@@ -326,7 +326,7 @@ with gr.Blocks(title="Sentinel - Counterparty Risk Terminal") as demo:
 
         with gr.Row(elem_id="input-row"):
             entity = gr.Textbox(
-                placeholder="Enter company name (e.g. Stripe, Monzo, Ravelin)",
+                placeholder="Enter company name (e.g. Stripe.com, Monzo.com, Ravelin.com)",
                 label="",
                 scale=5,
                 container=False,
@@ -334,7 +334,7 @@ with gr.Blocks(title="Sentinel - Counterparty Risk Terminal") as demo:
             submit = gr.Button("Analyze", elem_id="submit-btn", scale=1)
 
         gr.Examples(
-            examples=["Stripe", "Monzo Bank", "Ravelin", "Afterpay", "Nonexistent Shell Co"],
+            examples=["Stripe.com", "Monzo.com", "Ravelin.com", "Afterpay.com", "Nonexistent Shell Co"],
             inputs=entity,
             label="",
         )
