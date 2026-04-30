@@ -1,10 +1,13 @@
 """Specter API client."""
 import os
+from copy import deepcopy
+from functools import lru_cache
 from typing import Optional, Dict, Any
 import httpx
 
 
 SPECTER_BASE = "https://app.tryspecter.com/api/v1"
+_HTTP_CLIENT: httpx.Client | None = None
 
 
 class SpecterError(Exception):
@@ -21,43 +24,70 @@ def _headers() -> Dict[str, str]:
     }
 
 
+def _client() -> httpx.Client:
+    """Reuse one HTTP client to avoid reconnect/TLS overhead on each call."""
+    global _HTTP_CLIENT
+    if _HTTP_CLIENT is None:
+        try:
+            _HTTP_CLIENT = httpx.Client(timeout=20.0, http2=True)
+        except ImportError:
+            # Fallback when optional http2 dependency (h2) is not installed.
+            _HTTP_CLIENT = httpx.Client(timeout=20.0)
+    return _HTTP_CLIENT
+
+
+@lru_cache(maxsize=256)
 def search_company(name: str) -> Optional[str]:
     """Resolve a company name to a domain via Specter company search."""
     try:
-        with httpx.Client(timeout=15.0) as client:
-            r = client.get(
-                f"{SPECTER_BASE}/companies/search",
-                headers=_headers(),
-                params={"query": name},
-            )
-            if r.status_code == 404:
-                return None
-            r.raise_for_status()
-            data = r.json()
-            if not data:
-                return None
-            first = data[0] if isinstance(data, list) else data
-            return first.get("domain")
+        r = _client().get(
+            f"{SPECTER_BASE}/companies/search",
+            headers=_headers(),
+            params={"query": name},
+        )
+        if r.status_code == 404:
+            return None
+        r.raise_for_status()
+        data = r.json()
+        if not data:
+            return None
+        first = data[0] if isinstance(data, list) else data
+        return first.get("domain")
     except httpx.HTTPError as e:
         raise SpecterError(f"company search failed: {e}") from e
+
+
+@lru_cache(maxsize=256)
+def _enrich_company_cached(domain: str) -> Dict[str, Any]:
+    """Cached enrich call to reduce repeated API latency for common demos."""
+    r = _client().post(
+        f"{SPECTER_BASE}/companies",
+        headers=_headers(),
+        json={"domain": domain},
+    )
+    r.raise_for_status()
+    data = r.json()
+    if not data:
+        raise SpecterError(f"No Specter match for domain: {domain}")
+    return _slim_profile(data[0])
 
 
 def enrich_company(domain: str) -> Dict[str, Any]:
     """Enrich a domain into a full Specter profile, slimmed to the fields we use."""
     try:
-        with httpx.Client(timeout=20.0) as client:
-            r = client.post(
-                f"{SPECTER_BASE}/companies",
-                headers=_headers(),
-                json={"domain": domain},
-            )
-            r.raise_for_status()
-            data = r.json()
-            if not data:
-                raise SpecterError(f"No Specter match for domain: {domain}")
-            return _slim_profile(data[0])
+        # Return a defensive copy so downstream code cannot mutate cached state.
+        return deepcopy(_enrich_company_cached(domain))
     except httpx.HTTPError as e:
         raise SpecterError(f"enrichment failed: {e}") from e
+
+
+def warmup_specter_connection() -> None:
+    """Best-effort warmup so first interactive request is faster."""
+    try:
+        search_company("stripe")
+    except Exception:
+        # Warmup is opportunistic; failures should not affect app startup.
+        pass
 
 
 def _slim_profile(raw: Dict[str, Any]) -> Dict[str, Any]:

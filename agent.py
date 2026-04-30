@@ -196,7 +196,34 @@ def _is_unresolved_entity(trace: list[Dict[str, Any]], last_enrichment: Dict[str
     )
 
 
-def run_agent(entity_name: str, max_iterations: int = 8) -> Dict[str, Any]:
+def _parse_memo_json(text: str) -> Dict[str, Any]:
+    """Parse model text into memo JSON, tolerating wrapper text/fences."""
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.split("```", 2)[1]
+        if cleaned.startswith("json"):
+            cleaned = cleaned[4:]
+        cleaned = cleaned.rsplit("```", 1)[0].strip()
+
+    if cleaned:
+        try:
+            parsed = json.loads(cleaned)
+            if isinstance(parsed, dict):
+                return parsed
+        except json.JSONDecodeError:
+            pass
+
+    start = cleaned.find("{")
+    end = cleaned.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        maybe_json = cleaned[start : end + 1]
+        parsed = json.loads(maybe_json)
+        if isinstance(parsed, dict):
+            return parsed
+    raise json.JSONDecodeError("Unable to parse memo JSON", cleaned, 0)
+
+
+def run_agent(entity_name: str, max_iterations: int = 6) -> Dict[str, Any]:
     """Run the tool-use loop until the model emits the final memo JSON."""
     global client
     if client is None:
@@ -212,7 +239,7 @@ def run_agent(entity_name: str, max_iterations: int = 8) -> Dict[str, Any]:
     for i in range(max_iterations):
         response = client.messages.create(
             model=MODEL,
-            max_tokens=2048,
+            max_tokens=1200,
             system=SYSTEM_PROMPT,
             tools=TOOL_SCHEMAS,
             messages=messages,
@@ -247,14 +274,18 @@ def run_agent(entity_name: str, max_iterations: int = 8) -> Dict[str, Any]:
 
         # Final answer
         text = "".join(b.text for b in response.content if b.type == "text").strip()
-        # Strip code fences if model adds them despite instructions
-        if text.startswith("```"):
-            text = text.split("```", 2)[1]
-            if text.startswith("json"):
-                text = text[4:]
-            text = text.rsplit("```", 1)[0].strip()
-
-        memo_dict = json.loads(text)
+        try:
+            memo_dict = _parse_memo_json(text)
+        except json.JSONDecodeError:
+            # Ask once for strict schema-only JSON and continue loop.
+            messages.append({
+                "role": "user",
+                "content": (
+                    "Return ONLY a single valid JSON object matching the required schema. "
+                    "No markdown, no explanation."
+                ),
+            })
+            continue
 
         # Hard-fail unknown entities: if search_company returns no domain and we never
         # receive a valid enrichment profile, we cannot perform automated diligence.
