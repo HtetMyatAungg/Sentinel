@@ -260,6 +260,37 @@ MOCK_FIXTURES = {
             "web_visits": {"12mo": {"change": 800000, "percentage": 22}},
         },
     },
+    "afterpay.com": {
+        "id": "spec_afterpay_004",
+        "organization_name": "Afterpay",
+        "description": "Buy-now-pay-later provider acquired by Block.",
+        "operating_status": "acquired",
+        "growth_stage": "late_stage",
+        "founded_year": 2014,
+        "employee_count": 1600,
+        "employee_count_range": "1001-5000",
+        "revenue_estimate_usd": 950000000,
+        "investors": ["Tiger Global", "Bond", "Coatue"],
+        "investor_count": 9,
+        "highlights": ["top_tier_investors", "strong_web_traffic_growth"],
+        "funding": {
+            "total_funding_usd": 600000000,
+            "last_funding_usd": 40000000,
+            "last_funding_date": "2020-09-10",
+            "last_funding_type": "venture",
+            "round_count": 6,
+        },
+        "awards": [],
+        "certifications": [["SOC 2"]],
+        "acquisition": {"acquirer_name": "Block", "acquisition_date": "2022-01-31"},
+        "news": [
+            {"date": "2022-01-31", "title": "Block completes Afterpay acquisition", "publisher": "Reuters"},
+        ],
+        "traction_metrics": {
+            "employee_count": {"12mo": {"change": 40, "percentage": 3}},
+            "web_visits": {"12mo": {"change": 350000, "percentage": 12}},
+        },
+    },
 }
 
 NAME_TO_DOMAIN = {
@@ -267,6 +298,7 @@ NAME_TO_DOMAIN = {
     "ravelin": "ravelin.com",
     "monzo": "monzo.com",
     "monzo bank": "monzo.com",
+    "afterpay": "afterpay.com",
 }
 
 
@@ -481,6 +513,37 @@ MOCK_FIXTURES = {
             "web_visits": {"12mo": {"change": 800000, "percentage": 22}},
         },
     },
+    "afterpay.com": {
+        "id": "spec_afterpay_004",
+        "organization_name": "Afterpay",
+        "description": "Buy-now-pay-later provider acquired by Block.",
+        "operating_status": "acquired",
+        "growth_stage": "late_stage",
+        "founded_year": 2014,
+        "employee_count": 1600,
+        "employee_count_range": "1001-5000",
+        "revenue_estimate_usd": 950000000,
+        "investors": ["Tiger Global", "Bond", "Coatue"],
+        "investor_count": 9,
+        "highlights": ["top_tier_investors", "strong_web_traffic_growth"],
+        "funding": {
+            "total_funding_usd": 600000000,
+            "last_funding_usd": 40000000,
+            "last_funding_date": "2020-09-10",
+            "last_funding_type": "venture",
+            "round_count": 6,
+        },
+        "awards": [],
+        "certifications": [["SOC 2"]],
+        "acquisition": {"acquirer_name": "Block", "acquisition_date": "2022-01-31"},
+        "news": [
+            {"date": "2022-01-31", "title": "Block completes Afterpay acquisition", "publisher": "Reuters"},
+        ],
+        "traction_metrics": {
+            "employee_count": {"12mo": {"change": 40, "percentage": 3}},
+            "web_visits": {"12mo": {"change": 350000, "percentage": 12}},
+        },
+    },
 }
 
 
@@ -490,6 +553,7 @@ NAME_TO_DOMAIN = {
     "ravelin": "ravelin.com",
     "monzo": "monzo.com",
     "monzo bank": "monzo.com",
+    "afterpay": "afterpay.com",
 }
 
 
@@ -707,6 +771,37 @@ MOCK_FIXTURES = {
             "web_visits": {"12mo": {"change": 800000, "percentage": 22}},
         },
     },
+    "afterpay.com": {
+        "id": "spec_afterpay_004",
+        "organization_name": "Afterpay",
+        "description": "Buy-now-pay-later provider acquired by Block.",
+        "operating_status": "acquired",
+        "growth_stage": "late_stage",
+        "founded_year": 2014,
+        "employee_count": 1600,
+        "employee_count_range": "1001-5000",
+        "revenue_estimate_usd": 950000000,
+        "investors": ["Tiger Global", "Bond", "Coatue"],
+        "investor_count": 9,
+        "highlights": ["top_tier_investors", "strong_web_traffic_growth"],
+        "funding": {
+            "total_funding_usd": 600000000,
+            "last_funding_usd": 40000000,
+            "last_funding_date": "2020-09-10",
+            "last_funding_type": "venture",
+            "round_count": 6,
+        },
+        "awards": [],
+        "certifications": [["SOC 2"]],
+        "acquisition": {"acquirer_name": "Block", "acquisition_date": "2022-01-31"},
+        "news": [
+            {"date": "2022-01-31", "title": "Block completes Afterpay acquisition", "publisher": "Reuters"},
+        ],
+        "traction_metrics": {
+            "employee_count": {"12mo": {"change": 40, "percentage": 3}},
+            "web_visits": {"12mo": {"change": 350000, "percentage": 12}},
+        },
+    },
 }
 
 
@@ -716,6 +811,7 @@ NAME_TO_DOMAIN = {
     "ravelin": "ravelin.com",
     "monzo": "monzo.com",
     "monzo bank": "monzo.com",
+    "afterpay": "afterpay.com",
 }
 
 

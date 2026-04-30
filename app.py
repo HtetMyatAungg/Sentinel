@@ -311,7 +311,7 @@ with gr.Blocks(title="Sentinel - Counterparty Risk Terminal") as demo:
         submit = gr.Button("Analyze", elem_id="submit-btn", scale=1)
 
     gr.Examples(
-        examples=["Stripe", "Monzo Bank", "Ravelin", "Nonexistent Shell Co"],
+        examples=["Stripe", "Monzo Bank", "Ravelin", "Afterpay", "Nonexistent Shell Co"],
         inputs=entity,
         label="",
     )
