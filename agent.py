@@ -36,7 +36,7 @@ Given a company name, your job is to gather signal and produce a verdict on whet
 
 WORKFLOW (in order):
 1. Call `search_company` to resolve the name to a domain.
-2. If no domain match: stop. Verdict ESCALATE, requires_human_review=true, reason "Entity not found in Specter — manual investigation needed."
+2. If no domain match: stop. Verdict DECLINE, requires_human_review=false, reason null. Summary should state entity was not found in Specter and cannot be assessed.
 3. Call `enrich_company` with that domain.
 4. Analyze the profile against the heuristics below.
 5. Output the final memo as a single JSON object — no preamble, no markdown fences.
@@ -186,6 +186,16 @@ def enforce_policy_guardrails(memo_dict: Dict[str, Any], profile: Dict[str, Any]
     return memo_dict
 
 
+def _is_unresolved_entity(trace: list[Dict[str, Any]], last_enrichment: Dict[str, Any] | None) -> bool:
+    """Return True when search resolved no domain and no enrichment exists."""
+    return last_enrichment is None and any(
+        t.get("tool") == "search_company"
+        and isinstance(t.get("result_preview"), str)
+        and '"domain": null' in t["result_preview"]
+        for t in trace
+    )
+
+
 def run_agent(entity_name: str, max_iterations: int = 8) -> Dict[str, Any]:
     """Run the tool-use loop until the model emits the final memo JSON."""
     global client
@@ -245,6 +255,15 @@ def run_agent(entity_name: str, max_iterations: int = 8) -> Dict[str, Any]:
             text = text.rsplit("```", 1)[0].strip()
 
         memo_dict = json.loads(text)
+
+        # Hard-fail unknown entities: if search_company returns no domain and we never
+        # receive a valid enrichment profile, we cannot perform automated diligence.
+        unresolved_entity = _is_unresolved_entity(trace, last_enrichment)
+        if unresolved_entity:
+            memo_dict["verdict"] = "DECLINE"
+            memo_dict["requires_human_review"] = False
+            memo_dict["review_reason"] = None
+
         memo_dict = enforce_policy_guardrails(memo_dict, last_enrichment)
         memo = CounterpartyMemo(**memo_dict)
         return {"memo": memo.model_dump(), "trace": trace}

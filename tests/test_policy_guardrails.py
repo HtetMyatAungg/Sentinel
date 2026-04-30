@@ -2,7 +2,7 @@
 import unittest
 from datetime import date, timedelta
 
-from agent import enforce_policy_guardrails
+from agent import enforce_policy_guardrails, _is_unresolved_entity
 
 
 def _base_memo() -> dict:
@@ -104,6 +104,17 @@ class PolicyGuardrailsTest(unittest.TestCase):
         out = enforce_policy_guardrails(memo, None)
         self.assertEqual(out["verdict"], "PROCEED")
         self.assertEqual(out["confidence"], 0.9)
+
+
+class UnresolvedEntityPolicyTest(unittest.TestCase):
+    def test_no_domain_match_forces_decline(self) -> None:
+        trace = [{"tool": "search_company", "result_preview": '{"domain": null}'}]
+        self.assertTrue(_is_unresolved_entity(trace, None))
+
+    def test_resolved_or_enriched_entity_is_not_unresolved(self) -> None:
+        trace = [{"tool": "search_company", "result_preview": '{"domain": "example.com"}'}]
+        self.assertFalse(_is_unresolved_entity(trace, None))
+        self.assertFalse(_is_unresolved_entity(trace, {"operating_status": "active"}))
 
 
 if __name__ == "__main__":
