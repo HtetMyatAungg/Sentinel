@@ -29,8 +29,18 @@ CSS = """
     background: #0a0e14 !important;
     font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace !important;
     max-width: 1100px !important;
+    margin: 0 auto !important;
+    padding: 32px 20px 40px !important;
 }
 .gradio-container * { color: #e2e8f0; }
+
+.gradio-main {
+    background: #0c111b;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    padding: 28px;
+}
 
 #header {
     border-bottom: 1px solid #1e293b;
@@ -58,6 +68,7 @@ CSS = """
     border: 1px solid #1e293b !important;
     color: #f1f5f9 !important;
     font-family: inherit !important;
+    border-radius: 6px !important;
 }
 #submit-btn {
     background: #f8fafc !important;
@@ -70,10 +81,21 @@ CSS = """
 }
 #submit-btn:hover { background: #e2e8f0 !important; }
 
+.gradio-container .examples {
+    margin-top: 10px !important;
+    margin-bottom: 14px !important;
+}
+.gradio-container .examples .example {
+    background: #0f172a !important;
+    border: 1px solid #1e293b !important;
+    border-radius: 999px !important;
+    color: #cbd5e1 !important;
+}
+
 .memo {
     background: #0f172a;
     border: 1px solid #1e293b;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 24px;
     margin-top: 16px;
     font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -295,32 +317,32 @@ def analyze(entity_name: str):
 
 
 with gr.Blocks(title="Sentinel - Counterparty Risk Terminal") as demo:
-    with gr.Column(elem_id="header"):
-        gr.HTML("""
-            <h1>SENTINEL</h1>
-            <div class="subtitle">Counterparty Risk · Human-out-of-the-loop</div>
-        """)
+    with gr.Column(elem_classes="gradio-main"):
+        with gr.Column(elem_id="header"):
+            gr.HTML("""
+                <h1>SENTINEL</h1>
+                <div class="subtitle">Counterparty Risk · Human-out-of-the-loop</div>
+            """)
 
-    with gr.Row(elem_id="input-row"):
-        entity = gr.Textbox(
-            placeholder="Enter company name (e.g. Stripe, Monzo, Ravelin)",
+        with gr.Row(elem_id="input-row"):
+            entity = gr.Textbox(
+                placeholder="Enter company name (e.g. Stripe, Monzo, Ravelin)",
+                label="",
+                scale=5,
+                container=False,
+            )
+            submit = gr.Button("Analyze", elem_id="submit-btn", scale=1)
+
+        gr.Examples(
+            examples=["Stripe", "Monzo Bank", "Ravelin", "Afterpay", "Nonexistent Shell Co"],
+            inputs=entity,
             label="",
-            scale=5,
-            container=False,
         )
-        submit = gr.Button("Analyze", elem_id="submit-btn", scale=1)
 
-    gr.Examples(
-        examples=["Stripe", "Monzo Bank", "Ravelin", "Afterpay", "Nonexistent Shell Co"],
-        inputs=entity,
-        label="",
-    )
+        output = gr.HTML()
 
-    output = gr.HTML()
-
-    submit.click(analyze, inputs=entity, outputs=output)
-    entity.submit(analyze, inputs=entity, outputs=output)
-
+        submit.click(analyze, inputs=entity, outputs=output)
+        entity.submit(analyze, inputs=entity, outputs=output)
 
 if __name__ == "__main__":
     # Allow override via env var; otherwise try ports 7860-7960.
